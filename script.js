@@ -183,13 +183,21 @@ function adicionarPrestador() {
     for (let i = 0; i < document.getElementsByName('regiao').length; i++) {
         if (document.getElementsByName('regiao')[i].checked) {
             elRegiao = document.getElementsByName('regiao')[i].id.slice(7);
+            if(i == 2){
+                elRegiao = 'centro-oeste';
+            }
         }
     }
 
     let elHabilidades = '';
+    let totalDeHabilidades = 0;
     for (let i = 0; i < habilidades.length; i++) {
         if (habilidades[i].checked) {
-            elHabilidades += habilidades[i].id.slice(11) + ' ';
+            if(totalDeHabilidades > 0){
+                elHabilidades += ', ';
+            }
+            elHabilidades += document.getElementsByName('habilidade')[i].parentNode.innerText;
+            totalDeHabilidades++;
         }
     }
 
