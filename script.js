@@ -5,7 +5,7 @@
 let acao = 'adicionar';
 
 
-if(localStorage.getItem('prestadores') === null){
+if (localStorage.getItem('prestadores') === null) {
     window.localStorage.setItem('prestadores', '[]');
 }
 
@@ -60,15 +60,15 @@ formulario.addEventListener('submit', evento => {
     if (temErro) {
         evento.preventDefault();
     }
-    else{
-        if (acao == 'adicionar'){
+    else {
+        if (acao == 'adicionar') {
             adicionarPrestador();
         } else {
             alterarPrestador();
         }
     }
 
-    
+
 
 });
 
@@ -194,19 +194,19 @@ function adicionarPrestador() {
     let elRegiao = '';
     let elDisponibilidade = document.querySelector('#data-inicial').value + ' - ' + document.querySelector('#data-final').value;
 
-    for(let i = 0; i < document.getElementsByName('regiao').length; i++){
-        if(document.getElementsByName('regiao')[i].checked){
+    for (let i = 0; i < document.getElementsByName('regiao').length; i++) {
+        if (document.getElementsByName('regiao')[i].checked) {
             elRegiao = document.getElementsByName('regiao')[i].id.slice(7);
         }
     }
 
     elHabilidades = '';
 
-    for(let i = 0; i < document.getElementsByName('habilidade').length; i++){
-        if(elHabilidades == '' && document.getElementsByName('habilidade')[i].checked){
+    for (let i = 0; i < document.getElementsByName('habilidade').length; i++) {
+        if (elHabilidades == '' && document.getElementsByName('habilidade')[i].checked) {
             elHabilidades += document.getElementsByName('habilidade')[i].id.slice(11);
         }
-        else if(document.getElementsByName('habilidade')[i].checked){
+        else if (document.getElementsByName('habilidade')[i].checked) {
             elHabilidades += ', ' + document.getElementsByName('habilidade')[i].id.slice(11);
         }
     }
@@ -289,9 +289,64 @@ function removerPrestador(botao) {
     tabela.tBodies[0].removeChild(linhaParaRemover);
 }
 
-function alterarPrestador(alterar){
+function alterarPrestador(alterar) {
     let id = alterar.dataset.prestadorid;
-    let prestador = JSON.parse(localStorage.getItem('prestadores'))[id];
-    JSON.parse(localStorage.getItem('prestadores'))[i].nome
+    let prestadores = window.localStorage.getItem('prestadores');
+    let prestador = JSON.parse(prestadores);
+    //prestador[id].nome = 'Batman';
+    //prestador[id].sobrenome = 'Kent';
+    //window.localStorage.setItem('prestadores', JSON.stringify(prestador));
+    document.getElementById("nome").value = prestador[id].nome;
+    document.getElementById("sobrenome").value = prestador[id].sobrenome;
+    document.getElementById("email").value = prestador[id].email;
+    document.getElementById("website").value = prestador[id].website;
+    document.getElementById("data-inicial").value = prestador[id].disponibilidade.slice(0,10);
+    document.getElementById("data-final").value = prestador[id].disponibilidade.slice(13);
+    if(prestador[id].regiao.includes('sul')){
+        document.getElementsByName('regiao')[0].checked = true
+    }
+    if(prestador[id].regiao.includes('sudeste')){
+        document.getElementsByName('regiao')[1].checked = true
+    }
+    let elProgramador = document.querySelector('#habilidade-programador');
+    let elDBA = document.querySelector('#habilidade-dba');
+    if (prestador[id].regiao.includes('coeste')) {
+        document.getElementsByName('regiao')[2].checked = true
+        elProgramador.disabled = true;
+        elProgramador.checked = false;
+        elDBA.disabled = true;
+        elDBA.checked = false;
+    } else {
+        elProgramador.disabled = false;
+        elDBA.disabled = false;
+    }
+    if(prestador[id].regiao.includes('nordeste')){
+        document.getElementsByName('regiao')[3].checked = true
+    }
+    if(prestador[id].regiao.includes('norte')){
+        document.getElementsByName('regiao')[4].checked = true
+    }
+    document.getElementsByName('habilidade').forEach(element => {
+        element.checked = false;
+    });
+    if(prestador[id].habilidades.includes('analista')){
+        document.getElementsByName('habilidade')[0].checked = true
+    }
+    if(prestador[id].habilidades.includes('programador')){
+        document.getElementsByName('habilidade')[1].checked = true
+    }
+    if(prestador[id].habilidades.includes('webdes')){
+        document.getElementsByName('habilidade')[2].checked = true
+    }
+    if(prestador[id].habilidades.includes('dba')){
+        document.getElementsByName('habilidade')[3].checked = true
+    }
+    if(prestador[id].habilidades.includes('rede')){
+        document.getElementsByName('habilidade')[4].checked = true
+    }
+
+
+
+    document.getElementById("nome").focus();
 
 }
