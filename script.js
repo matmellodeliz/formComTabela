@@ -1,6 +1,6 @@
 // ATENÇÃO, Insira seu script aqui
 
-//Nome do aluno: Mateus Mello de Liz
+//Nome do aluno: Mateus Mello
 //----------------------------------------------------------------------------------------------------------------
 let acao = 'adicionar';
 
