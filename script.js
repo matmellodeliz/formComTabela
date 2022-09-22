@@ -2,26 +2,28 @@
 
 //Nome do aluno: COLOQUE SEU NOME
 //----------------------------------------------------------------------------------------------------------------
+let acao = 'adicionar';
 
 
-let campoEmail = document.querySelector('#email');
-let campoNome = document.querySelector('#nome');
-let campoSobrenome = document.querySelector('#sobrenome');
-let campoSite = document.querySelector('#website');
-let habilidades = document.getElementsByName('habilidade');
-let campoDataInicial = document.querySelector('#data-inicial');
-let campoDataFinal = document.querySelector('#data-final');
-let formulario = document.forms[0];
+if(localStorage.getItem('prestadores') === null){
+    window.localStorage.setItem('prestadores', '[]');
+}
 
 let prestadores = [];
 
+carregarPrestadores();
+
+const campoEmail = document.querySelector('#email');
+const campoNome = document.querySelector('#nome');
+const formulario = document.forms[0];
 
 document.getElementsByName('regiao').forEach(regiao => {
     regiao.addEventListener('change', evento => {
         validarRegiao(evento.target);
     });
 })
-carregarPrestadores();
+
+
 
 formulario.addEventListener('submit', evento => {
     let temErro = false;
@@ -35,38 +37,38 @@ formulario.addEventListener('submit', evento => {
         temErro = true;
     }
 
-
+    const campoSobrenome = document.querySelector('#sobrenome');
     if (!validarSobrenome(campoSobrenome.value)) {
         escreveErro(campoSobrenome, 'Sobrenome inválido');
         temErro = true;
     }
 
-
+    const campoSite = document.querySelector('#website');
     if (!validarWebsite(campoSite.value)) {
         escreveErro(campoSite, 'Informe um endereço no formato http[x]://www.exemplo.com');
         temErro = true;
     }
 
-
+    const habilidades = document.getElementsByName('habilidade');
     if (!validarHabilidades(habilidades)) {
         document.querySelector('.erro-regiao').textContent = 'Informe no mínimo 1 e no máximo 3 habilidades';
         temErro = true;
     }
 
 
-    if (!validarData(campoDataInicial.value, campoDataFinal.value)) {
-        escreveErro(campoDataFinal, 'Informe datas válidas');
-        temErro = true;
-    }
 
     if (temErro) {
         evento.preventDefault();
     }
-    else {
-        adicionarPrestador();
+    else{
+        if (acao == 'adicionar'){
+            adicionarPrestador();
+        } else {
+            alterarPrestador();
+        }
     }
 
-
+    
 
 });
 
@@ -178,59 +180,83 @@ function validarRegiao(regiao) {
     }
 }
 
+
+
+
+
+
 function adicionarPrestador() {
+
+    let elNome = document.querySelector('#nome');
+    let elSobrenome = document.querySelector('#sobrenome');
+    let elEmail = document.querySelector('#email');
+    let elWebsite = document.querySelector('#website');
     let elRegiao = '';
-    for (let i = 0; i < document.getElementsByName('regiao').length; i++) {
-        if (document.getElementsByName('regiao')[i].checked) {
+    let elDisponibilidade = document.querySelector('#data-inicial').value + ' - ' + document.querySelector('#data-final').value;
+
+    for(let i = 0; i < document.getElementsByName('regiao').length; i++){
+        if(document.getElementsByName('regiao')[i].checked){
             elRegiao = document.getElementsByName('regiao')[i].id.slice(7);
-            if(i == 2){
-                elRegiao = 'centro-oeste';
-            }
         }
     }
 
-    let elHabilidades = '';
-    let totalDeHabilidades = 0;
-    for (let i = 0; i < habilidades.length; i++) {
-        if (habilidades[i].checked) {
-            if(totalDeHabilidades > 0){
-                elHabilidades += ', ';
-            }
-            elHabilidades += document.getElementsByName('habilidade')[i].parentNode.innerText;
-            totalDeHabilidades++;
+    elHabilidades = '';
+
+    for(let i = 0; i < document.getElementsByName('habilidade').length; i++){
+        if(elHabilidades == '' && document.getElementsByName('habilidade')[i].checked){
+            elHabilidades += document.getElementsByName('habilidade')[i].id.slice(11);
+        }
+        else if(document.getElementsByName('habilidade')[i].checked){
+            elHabilidades += ', ' + document.getElementsByName('habilidade')[i].id.slice(11);
         }
     }
 
     let prestador = {
-        nome: campoNome.value,
-        sobrenome: campoSobrenome.value,
-        email: campoEmail.value,
-        website: campoSite.value,
+        nome: elNome.value,
+        sobrenome: elSobrenome.value,
+        email: elEmail.value,
+        website: elWebsite.value,
+        disponibilidade: elDisponibilidade,
         regiao: elRegiao,
-        habilidades: elHabilidades,
-        disponibilidade: campoDataInicial.value + ' - ' + campoDataFinal.value
+        habilidades: elHabilidades
     };
     novoPrestador(prestador);
+
 }
+
 
 function novoPrestador(prestador) {
     let id = prestadores.push(prestador);
-    let prestadoresTexto = JSON.stringify(prestadores);
-    window.localStorage.setItem('prestadores', prestadoresTexto);
+    let prestradoresTexto = JSON.stringify(prestadores);
+    window.localStorage.setItem('prestadores', prestradoresTexto);
     adicionarItemTabela(prestador, id);
+}
+
+
+function carregarPrestadores() {
+    let prestadores = JSON.parse(window.localStorage.getItem('prestadores'));
+    for (let x = 0; x < prestadores.length; x++) {
+        let prestador = prestadores[x];
+        if (prestador != null) {
+            novoPrestador(prestador);
+        }
+    }
 }
 
 function adicionarItemTabela(prestador, id) {
     let tabela = document.querySelector('#tabela-agenda');
     let linha = tabela.tBodies[0].insertRow();
     let celulaNome = linha.insertCell();
+    let celulaSobrenome = linha.insertCell();
     let celulaEmail = linha.insertCell();
     let celulaWebsite = linha.insertCell();
     let celulaDisponibilidade = linha.insertCell();
     let celulaRegiao = linha.insertCell();
     let celulaHabilidades = linha.insertCell();
     let celulaAcao = linha.insertCell();
-    celulaNome.textContent = prestador.nome + ' ' + prestador.sobrenome;
+    let celulaAlteracao = linha.insertCell();
+    celulaNome.textContent = prestador.nome;
+    celulaSobrenome.textContent = prestador.sobrenome;
     celulaEmail.textContent = prestador.email;
     celulaWebsite.textContent = prestador.website;
     celulaDisponibilidade.textContent = prestador.disponibilidade;
@@ -239,10 +265,18 @@ function adicionarItemTabela(prestador, id) {
     let botao = document.createElement('button');
     botao.className = 'btn btn-danger';
     botao.innerText = 'Excluir';
-    botao.dataset.prestadorid = Number(id-1);
+    botao.dataset.prestadorid = Number(id) - 1;
     celulaAcao.appendChild(botao);
     botao.addEventListener('click', (evento) => {
         removerPrestador(evento.target);
+    });
+    let alterar = document.createElement('button');
+    alterar.className = 'btn btn-info';
+    alterar.innerText = 'Alterar';
+    alterar.dataset.prestadorid = Number(id) - 1;
+    celulaAlteracao.appendChild(alterar);
+    alterar.addEventListener('click', (evento) => {
+        alterarPrestador(evento.target);
     });
 }
 
@@ -255,18 +289,9 @@ function removerPrestador(botao) {
     tabela.tBodies[0].removeChild(linhaParaRemover);
 }
 
-function carregarPrestadores() {
-    if (localStorage.getItem('prestadores')) {
-        let prestadores = JSON.parse(window.localStorage.getItem('prestadores'));
-        for (let i = 0; i < prestadores.length; i++) {
-            let prestador = prestadores[i];
-            if (prestador != null) {
-                novoPrestador(prestador);
-            }
-        }
-    }
-    else{
-        window.localStorage.setItem('prestadores', JSON.stringify(prestadores));
-    }
+function alterarPrestador(alterar){
+    let id = alterar.dataset.prestadorid;
+    let prestador = JSON.parse(localStorage.getItem('prestadores'))[id];
+    JSON.parse(localStorage.getItem('prestadores'))[i].nome
 
 }
