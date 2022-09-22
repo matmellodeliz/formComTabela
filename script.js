@@ -2,7 +2,6 @@
 
 //Nome do aluno: Mateus Mello
 //----------------------------------------------------------------------------------------------------------------
-let acao = 'adicionar';
 
 
 if (localStorage.getItem('prestadores') === null) {
@@ -10,6 +9,7 @@ if (localStorage.getItem('prestadores') === null) {
 }
 
 let prestadores = [];
+let id = 0;
 
 carregarPrestadores();
 
@@ -28,7 +28,6 @@ document.getElementsByName('regiao').forEach(regiao => {
 formulario.addEventListener('submit', evento => {
     let temErro = false;
     if (!validarNome(campoNome.value)) {
-        //evento.target.className = 'form-control is-invalid';
         escreveErro(campoNome, 'Nome tem que ter mais de 3 caracteres');
         temErro = true;
     }
@@ -61,7 +60,7 @@ formulario.addEventListener('submit', evento => {
         evento.preventDefault();
     }
     else {
-        if (acao == 'adicionar') {
+        if (document.getElementById('acao').name == 'adicionar') {
             adicionarPrestador();
         } else {
             alterarPrestador();
@@ -75,7 +74,6 @@ formulario.addEventListener('submit', evento => {
 
 campoNome.addEventListener('blur', (evento) => {
     if (!validarNome(evento.target.value)) {
-        //evento.target.className = 'form-control is-invalid';
         escreveErro(evento.target, 'Nome tem que ter mais de 3 caracteres');
     }
 });
@@ -87,7 +85,6 @@ campoEmail.addEventListener('blur', (evento) => {
 });
 
 function escreveErro(elemento, mensagem) {
-    //elemento.className = 'form-control is-invalid';
     elemento.classList.add('is-invalid');
     let elMsg = elemento.parentNode.querySelector('.invalid-feedback');
     elMsg.textContent = mensagem;
@@ -276,7 +273,7 @@ function adicionarItemTabela(prestador, id) {
     alterar.dataset.prestadorid = Number(id) - 1;
     celulaAlteracao.appendChild(alterar);
     alterar.addEventListener('click', (evento) => {
-        alterarPrestador(evento.target);
+        receberPrestadorDaTabela(evento.target);
     });
 }
 
@@ -289,13 +286,10 @@ function removerPrestador(botao) {
     tabela.tBodies[0].removeChild(linhaParaRemover);
 }
 
-function alterarPrestador(alterar) {
-    let id = alterar.dataset.prestadorid;
+function receberPrestadorDaTabela(alterar) {
+    id = alterar.dataset.prestadorid;
     let prestadores = window.localStorage.getItem('prestadores');
     let prestador = JSON.parse(prestadores);
-    //prestador[id].nome = 'Batman';
-    //prestador[id].sobrenome = 'Kent';
-    //window.localStorage.setItem('prestadores', JSON.stringify(prestador));
     document.getElementById("nome").value = prestador[id].nome;
     document.getElementById("sobrenome").value = prestador[id].sobrenome;
     document.getElementById("email").value = prestador[id].email;
@@ -345,8 +339,48 @@ function alterarPrestador(alterar) {
         document.getElementsByName('habilidade')[4].checked = true
     }
 
+    document.getElementById('acao').classList.add('btn-info');
+    document.getElementById('acao').setAttribute("name","alterar");
+    document.getElementById('acao').innerText = 'Alterar prestador de serviço';
+    document.getElementById('nome').focus();
+    
+}
 
+function alterarPrestador(){
+    let elNome = document.querySelector('#nome');
+    let elSobrenome = document.querySelector('#sobrenome');
+    let elEmail = document.querySelector('#email');
+    let elWebsite = document.querySelector('#website');
+    let elRegiao = '';
+    let elDisponibilidade = document.querySelector('#data-inicial').value + ' - ' + document.querySelector('#data-final').value;
 
-    document.getElementById("nome").focus();
+    for (let i = 0; i < document.getElementsByName('regiao').length; i++) {
+        if (document.getElementsByName('regiao')[i].checked) {
+            elRegiao = document.getElementsByName('regiao')[i].id.slice(7);
+        }
+    }
 
+    elHabilidades = '';
+
+    for (let i = 0; i < document.getElementsByName('habilidade').length; i++) {
+        if (elHabilidades == '' && document.getElementsByName('habilidade')[i].checked) {
+            elHabilidades += document.getElementsByName('habilidade')[i].id.slice(11);
+        }
+        else if (document.getElementsByName('habilidade')[i].checked) {
+            elHabilidades += ', ' + document.getElementsByName('habilidade')[i].id.slice(11);
+        }
+    }
+
+    let prestadores = window.localStorage.getItem('prestadores');
+    let prestador = JSON.parse(prestadores);
+    prestador[id].nome = elNome.value;
+    prestador[id].sobrenome = elSobrenome.value;
+    prestador[id].email = elEmail.value;
+    prestador[id].website = elWebsite.value;
+    prestador[id].disponibilidade = elDisponibilidade;
+    prestador[id].regiao = elRegiao;
+    prestador[id].habilidades = elHabilidades;
+    window.localStorage.setItem('prestadores', JSON.stringify(prestador));
+
+    
 }
